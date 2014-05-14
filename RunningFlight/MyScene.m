@@ -8,8 +8,15 @@
 
 #import "MyScene.h"
 
-@interface MyScene()
+static const uint32_t projectileCategory     =  0x1 << 0;
+static const uint32_t monsterCategory        =  0x1 << 1;
+static const uint32_t flightCategory         =  0x1 << 2;
+
+static int count=0;
+@interface MyScene()<SKPhysicsContactDelegate>
 @property (nonatomic) SKSpriteNode *flight;
+@property (nonatomic) SKLabelNode *score;
+@property (nonatomic) SKLabelNode *point;
 @property (nonatomic) NSTimeInterval lastSpawnTimeInterval;
 @property (nonatomic) NSTimeInterval lastUpdateTimeInterval;
 @property (nonatomic) NSTimeInterval projectileUpdateTimeInterval;
@@ -48,13 +55,25 @@ const float flightMoveSpeed=92.0;
     if (self = [super initWithSize:size]) {
         /* Setup your scene here */
         
-        self.backgroundColor = [SKColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
+        self.backgroundColor = [SKColor colorWithRed:0.15 green:0.15 blue:0.15 alpha:1.0];
         
         self.flight=[SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];
         self.flight.size=CGSizeMake(25.0, 25.0);
         self.flight.position = CGPointMake(100, self.frame.size.height/2);
+        
+        self.score=[SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+        self.score.text=@"SCORE : ";
+        self.score.fontSize=15;
+        self.score.position=CGPointMake(400,290);
 
+        self.point=[SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+        self.point.position=CGPointMake(450,290);
+        self.point.fontSize=15;
+        [self addChild:self.score];
         [self addChild:self.flight];
+        [self addChild:self.point];
+        self.physicsWorld.gravity = CGVectorMake(0,0);
+        self.physicsWorld.contactDelegate = self;
     }
     return self;
 }
@@ -64,7 +83,11 @@ const float flightMoveSpeed=92.0;
     
     // Create sprite
     SKSpriteNode * monster = [SKSpriteNode spriteNodeWithImageNamed:@"monster"];
-    
+    monster.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:monster.size]; // 1
+    monster.physicsBody.dynamic = YES; // 2
+    monster.physicsBody.categoryBitMask = monsterCategory; // 3
+    monster.physicsBody.contactTestBitMask = projectileCategory; // 4
+    monster.physicsBody.collisionBitMask = 0; // 5
     // Determine where to spawn the monster along the Y axis
     int minY = monster.size.height / 2;
     int maxY = self.frame.size.height - monster.size.height / 2;
@@ -78,8 +101,8 @@ const float flightMoveSpeed=92.0;
     [self addChild:monster];
     
     // Determine speed of the monster
-    int minDuration = 2.0;
-    int maxDuration = 4.0;
+    int minDuration = 5.0;
+    int maxDuration = 10.0;
     int rangeDuration = maxDuration - minDuration;
     int actualDuration = (arc4random() % rangeDuration) + minDuration;
     
@@ -94,9 +117,15 @@ const float flightMoveSpeed=92.0;
     
     // Create sprite
     SKSpriteNode * projectile = [SKSpriteNode spriteNodeWithImageNamed:@"projectile"];
-    
+    projectile.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:projectile.size.width/2];
+    projectile.physicsBody.dynamic = YES;
+    projectile.physicsBody.categoryBitMask = projectileCategory;
+    projectile.physicsBody.contactTestBitMask = monsterCategory;
+    projectile.physicsBody.collisionBitMask = 0;
+    projectile.physicsBody.usesPreciseCollisionDetection = YES;
+
     projectile.position = location;
-    projectile.size=CGSizeMake(15.0, 15.0);
+    projectile.size=CGSizeMake(5.0, 5.0);
     [self addChild:projectile];
     
     int actualDuration = 1.0;
@@ -108,6 +137,39 @@ const float flightMoveSpeed=92.0;
     [projectile runAction:[SKAction sequence:@[actionMove,actionMoveDone]]];
     
 }
+
+- (void)projectile:(SKSpriteNode *)projectile didCollideWithMonster:(SKSpriteNode *)monster {
+    count+=1;
+    NSString *s=[NSString stringWithFormat:@"%d",count];
+    self.point.text=s;
+    [projectile removeFromParent];
+    [monster removeFromParent];
+}
+
+- (void)didBeginContact:(SKPhysicsContact *)contact
+{
+    // 1
+    SKPhysicsBody *firstBody, *secondBody;
+    
+    if (contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask)
+    {
+        firstBody = contact.bodyA;
+        secondBody = contact.bodyB;
+    }
+    else
+    {
+        firstBody = contact.bodyB;
+        secondBody = contact.bodyA;
+    }
+    
+    // 2
+    if ((firstBody.categoryBitMask & projectileCategory) != 0 &&
+        (secondBody.categoryBitMask & monsterCategory) != 0)
+    {
+        [self projectile:(SKSpriteNode *) firstBody.node didCollideWithMonster:(SKSpriteNode *) secondBody.node];
+    }
+}
+
 - (void)updateWithTimeSinceLastUpdate:(CFTimeInterval)timeSinceLast {
     
     self.lastSpawnTimeInterval += timeSinceLast;
