@@ -12,6 +12,7 @@
 @property (nonatomic) SKSpriteNode *flight;
 @property (nonatomic) NSTimeInterval lastSpawnTimeInterval;
 @property (nonatomic) NSTimeInterval lastUpdateTimeInterval;
+@property (nonatomic) NSTimeInterval projectileUpdateTimeInterval;
 @end
 
 static inline CGPoint rwAdd(CGPoint a, CGPoint b) {
@@ -36,6 +37,11 @@ static inline CGPoint rwNormalize(CGPoint a) {
     return CGPointMake(a.x / length, a.y / length);
 }
 
+static float calculateDistant(CGPoint a, CGPoint b){
+    return sqrtf((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+}
+const float projectileSpeed=8.0;
+const float flightMoveSpeed=92.0;
 @implementation MyScene
 
 -(id)initWithSize:(CGSize)size {
@@ -93,25 +99,27 @@ static inline CGPoint rwNormalize(CGPoint a) {
     projectile.size=CGSizeMake(15.0, 15.0);
     [self addChild:projectile];
     
-    // Determine speed of the monster
-    //int minDuration = 2.0;
-    //int maxDuration = 4.0;
-    //int rangeDuration = maxDuration - minDuration;
-    int actualDuration = 1.0;//(arc4random() % rangeDuration) + minDuration;
+    int actualDuration = 1.0;
     
     // Create the actions
     SKAction * actionMove = [SKAction moveTo:CGPointMake(self.frame.size.width+20.0, location.y) duration:actualDuration];
+    //SKAction * wait=[SKAction waitForDuration:0.1];
     SKAction * actionMoveDone = [SKAction removeFromParent];
-    [projectile runAction:[SKAction sequence:@[actionMove, actionMoveDone]]];
+    [projectile runAction:[SKAction sequence:@[actionMove,actionMoveDone]]];
     
 }
 - (void)updateWithTimeSinceLastUpdate:(CFTimeInterval)timeSinceLast {
     
     self.lastSpawnTimeInterval += timeSinceLast;
+    self.projectileUpdateTimeInterval +=timeSinceLast;
+    if (self.projectileUpdateTimeInterval>0.1){
+        self.projectileUpdateTimeInterval=0.0;
+        [self addProjectile:self.flight.position];
+    }
     if (self.lastSpawnTimeInterval > 1) {
         self.lastSpawnTimeInterval = 0;
         [self addMonster];
-        [self addProjectile:self.flight.position];
+        //[self addProjectile:self.flight.position];
     }
 }
 
@@ -124,8 +132,8 @@ static inline CGPoint rwNormalize(CGPoint a) {
         //SKSpriteNode *sprite = [SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];
         
         //sprite.position = location;
-        
-        SKAction *action = [SKAction moveTo:location duration:1];
+        float moveDuration=calculateDistant(self.flight.position, location)/flightMoveSpeed;
+        SKAction *action = [SKAction moveTo:location duration:moveDuration];
         
         [self.flight runAction:action];
         
@@ -142,7 +150,6 @@ static inline CGPoint rwNormalize(CGPoint a) {
         timeSinceLast = 1.0 / 60.0;
         self.lastUpdateTimeInterval = currentTime;
     }
-    
     [self updateWithTimeSinceLastUpdate:timeSinceLast];
     
 }
