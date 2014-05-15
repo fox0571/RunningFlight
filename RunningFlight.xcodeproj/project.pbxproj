@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		989825EA1924D8A500DE09BD /* GameOverScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 989825E91924D8A500DE09BD /* GameOverScene.m */; };
 		98F11362192100E80073B0A5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98F11361192100E80073B0A5 /* Foundation.framework */; };
 		98F11364192100E80073B0A5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98F11363192100E80073B0A5 /* CoreGraphics.framework */; };
 		98F11366192100E80073B0A5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98F11365192100E80073B0A5 /* UIKit.framework */; };
@@ -40,6 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		989825E81924D8A500DE09BD /* GameOverScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameOverScene.h; sourceTree = "<group>"; };
+		989825E91924D8A500DE09BD /* GameOverScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameOverScene.m; sourceTree = "<group>"; };
 		98F1135E192100E80073B0A5 /* RunningFlight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RunningFlight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98F11361192100E80073B0A5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		98F11363192100E80073B0A5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -135,6 +138,8 @@
 				98F11379192100E80073B0A5 /* ViewController.m */,
 				98F1137B192100E80073B0A5 /* MyScene.h */,
 				98F1137C192100E80073B0A5 /* MyScene.m */,
+				989825E81924D8A500DE09BD /* GameOverScene.h */,
+				989825E91924D8A500DE09BD /* GameOverScene.m */,
 				98F1137E192100E80073B0A5 /* Spaceship.png */,
 				98F11380192100E80073B0A5 /* Images.xcassets */,
 				98F1136A192100E80073B0A5 /* Supporting Files */,
@@ -290,6 +295,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				989825EA1924D8A500DE09BD /* GameOverScene.m in Sources */,
 				98F1137D192100E80073B0A5 /* MyScene.m in Sources */,
 				98F1137A192100E80073B0A5 /* ViewController.m in Sources */,
 				98F11374192100E80073B0A5 /* AppDelegate.m in Sources */,
@@ -500,6 +506,7 @@
 				98F11399192100E80073B0A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		98F1139A192100E80073B0A5 /* Build configuration list for PBXNativeTarget "RunningFlightTests" */ = {
 			isa = XCConfigurationList;
@@ -508,6 +515,7 @@
 				98F1139C192100E80073B0A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

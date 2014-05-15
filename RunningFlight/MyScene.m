@@ -7,12 +7,13 @@
 //
 
 #import "MyScene.h"
-
+#import "GameOverScene.h"
 static const uint32_t projectileCategory     =  0x1 << 0;
 static const uint32_t monsterCategory        =  0x1 << 1;
 static const uint32_t flightCategory         =  0x1 << 2;
-
+static NSString *s;
 static int count=0;
+
 @interface MyScene()<SKPhysicsContactDelegate>
 @property (nonatomic) SKSpriteNode *flight;
 @property (nonatomic) SKLabelNode *score;
@@ -54,12 +55,17 @@ const float flightMoveSpeed=92.0;
 -(id)initWithSize:(CGSize)size {
     if (self = [super initWithSize:size]) {
         /* Setup your scene here */
-        
+        count=0;
         self.backgroundColor = [SKColor colorWithRed:0.15 green:0.15 blue:0.15 alpha:1.0];
         
         self.flight=[SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];
         self.flight.size=CGSizeMake(25.0, 25.0);
         self.flight.position = CGPointMake(100, self.frame.size.height/2);
+        self.flight.physicsBody=[SKPhysicsBody bodyWithRectangleOfSize:self.flight.size];
+        self.flight.physicsBody.dynamic=YES;
+        self.flight.physicsBody.categoryBitMask=flightCategory;
+        self.flight.physicsBody.contactTestBitMask=monsterCategory;
+        self.flight.physicsBody.collisionBitMask=0;
         
         self.score=[SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
         self.score.text=@"SCORE : ";
@@ -68,6 +74,7 @@ const float flightMoveSpeed=92.0;
 
         self.point=[SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
         self.point.position=CGPointMake(450,290);
+        self.point.text=@"0";
         self.point.fontSize=15;
         [self addChild:self.score];
         [self addChild:self.flight];
@@ -140,11 +147,28 @@ const float flightMoveSpeed=92.0;
 
 - (void)projectile:(SKSpriteNode *)projectile didCollideWithMonster:(SKSpriteNode *)monster {
     count+=1;
-    NSString *s=[NSString stringWithFormat:@"%d",count];
+    s=[NSString stringWithFormat:@"%d",count];
     self.point.text=s;
     [projectile removeFromParent];
     [monster removeFromParent];
 }
+
+- (void)flight:(SKSpriteNode *)flight didCollideWithMonster:(SKSpriteNode *)monster {
+    //count+=1;
+    //NSString *s=[NSString stringWithFormat:@"%d",count];
+    //self.point.text=s;
+    SKAction * loseAction = [SKAction runBlock:^{
+        SKTransition *reveal = [SKTransition flipHorizontalWithDuration:0.5];
+        SKScene * gameOverScene = [[GameOverScene alloc] initWithSize:self.size score:count];
+        [self.view presentScene:gameOverScene transition: reveal];
+    }];
+    s=@"0";
+    [monster runAction:loseAction];
+    //count=0;
+    //[self.flight removeFromParent];
+    //[monster removeFromParent];
+}
+
 
 - (void)didBeginContact:(SKPhysicsContact *)contact
 {
@@ -162,11 +186,18 @@ const float flightMoveSpeed=92.0;
         secondBody = contact.bodyA;
     }
     
-    // 2
+    // contact between projectile and monster
     if ((firstBody.categoryBitMask & projectileCategory) != 0 &&
         (secondBody.categoryBitMask & monsterCategory) != 0)
     {
         [self projectile:(SKSpriteNode *) firstBody.node didCollideWithMonster:(SKSpriteNode *) secondBody.node];
+    }
+    
+    //contact between flight and monster
+    if ((firstBody.categoryBitMask & monsterCategory) != 0 &&
+        (secondBody.categoryBitMask & flightCategory) != 0)
+    {
+        [self flight:(SKSpriteNode *) firstBody.node didCollideWithMonster:(SKSpriteNode *) secondBody.node];
     }
 }
 
